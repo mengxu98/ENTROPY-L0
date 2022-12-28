@@ -1,8 +1,6 @@
 
 
 rm(list = ls())
-gc()
-
 library("readxl")
 library("SCEnt")
 library("Matrix")
