@@ -1,13 +1,12 @@
 
 
-library(L0Learn)
-library(tidyr)
-library(Seurat)
+library("L0Learn")
+library("tidyr")
+library("Seurat")
 source("as_matrix_cpp.R")
 
 #
 load("/data/mengxu/data/L0/lung_L0_data_harmony.Rdata")
-
 seu_list <- SplitObject(scRNA_harmony, split.by = "stage")
 
 # normal -----------------------------------------------------------------------
