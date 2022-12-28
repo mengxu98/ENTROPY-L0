@@ -69,11 +69,6 @@ mat_combine <- rbind(
 
 
 # -------------------------------------------------------------------------
-
-# data_other_gene<-data_other_gene[samples_com$.,]#只保留具有标签的样本
-# data_other_gene<-data.frame(data_other_gene,check.names=TRUE)#check.names是因为回归变量名不能有‘-’，比如找不到对象'HLA-B'
-
-# X_SNV=as.matrix(mat_com)
 X_SNV <- mat_combine
 row.names(X_SNV) <- row.names(mat_combine)
 
@@ -82,9 +77,7 @@ Y_label <- samples_combine$label %>%
   as.vector()
 names(Y_label) <- samples_combine$.
 
-
 # clear workspace ---------------------------------------------------------
-
 rm(scRNA_harmony)
 rm(seu_list)
 
@@ -119,7 +112,6 @@ load(paste0("/data/mengxu/data/L0/lung_L0_input_data.Rdata"))
 maxSNVSize <- 50
 
 # L0L2 --------------------------------------------------------------------
-
 print("L0 learn")
 cvfit <- L0Learn.cvfit(X_SNV, Y_label,
   penalty = "L0L2", nGamma = 5, gammaMin = 0.0001,
@@ -133,7 +125,7 @@ optimalLambdaIndex <- which.min(cvfit$cvMeans[[optimalGammaIndex]])
 optimalLambda <- cvfit$fit$lambda[[optimalGammaIndex]][optimalLambdaIndex]
 print("predicting...")
 y_cat <- predict(cvfit,
-  newx = X_SNV, # predict函数要求行为样本。所以需转置
+  newx = X_SNV,
   lambda = optimalLambda, gamma = cvfit$fit$gamma[j]
 )
 print("predict done")
@@ -147,8 +139,8 @@ print("rmse done")
 ############
 temp <- coef(cvfit, lambda = optimalLambda, gamma = cvfit$fit$gamma[j])
 temp <- as.vector(temp)
-temp <- temp[-1] # 排除第一个位置上的intercept
-temp <- which(temp != 0) # 排除系数为0的冗余特征
+temp <- temp[-1]
+temp <- which(temp != 0)
 temp <- colnames(X_SNV)[temp]
 X_Y <- cbind(X_SNV[, temp], Y_label)
 X_Y_frame <- as.data.frame(X_Y)
@@ -159,8 +151,6 @@ L0_Rsquare_L0L2 <- 1 - mse(Y_label, y_hat) / var(Y_label)
 write.csv(fit_temp$coefficients, file = "/data/mengxu/data/L0/feature_selected_byL0L2.csv")
 
 # L0L1 --------------------------------------------------------------------
-
-
 print("L0 learn")
 cvfit <- L0Learn.cvfit(X_SNV, Y_label,
   penalty = "L0L1", nGamma = 5, gammaMin = 0.0001,
@@ -180,7 +170,7 @@ optimalLambdaIndex <- which.min(cvfit$cvMeans[[optimalGammaIndex]])
 optimalLambda <- cvfit$fit$lambda[[optimalGammaIndex]][optimalLambdaIndex]
 print("predicting...")
 y_cat <- predict(cvfit,
-  newx = X_SNV, # predict函数要求行为样本。所以需转置
+  newx = X_SNV,
   lambda = optimalLambda, gamma = cvfit$fit$gamma[j]
 )
 print("predict done")
@@ -194,8 +184,8 @@ print("rmse done")
 ############
 temp <- coef(cvfit, lambda = optimalLambda, gamma = cvfit$fit$gamma[j])
 temp <- as.vector(temp)
-temp <- temp[-1] # 排除第一个位置上的intercept
-temp <- which(temp != 0) # 排除系数为0的冗余特征
+temp <- temp[-1]
+temp <- which(temp != 0)
 temp <- colnames(X_SNV)[temp]
 X_Y <- cbind(X_SNV[, temp], Y_label)
 X_Y_frame <- as.data.frame(X_Y)
@@ -233,11 +223,10 @@ temp <- coef(cvfit,
   gamma = cvfit$gamma
 )
 temp <- as.vector(temp)
-temp <- temp[-1] # 排除第一个位置上的intercept
-temp <- which(temp != 0) # 排除系数为0的冗余特征
+temp <- temp[-1]
+temp <- which(temp != 0)
 temp <- colnames(X_SNV)[temp]
 temp
-# 这里的ifelse是为了处理只有一个样本TFs被选择，列名为“V1”的问题
 if (length(temp) == 1) {
   X_Y <- cbind(X_SNV[, temp], Y_label)
   colnames(X_Y)[1] <- temp
@@ -251,19 +240,13 @@ fit_temp <- summary(lmfit)
 res_data <- as.matrix(fit_temp$coefficients)
 res_data
 
-#### 打印模型信息####
 print(tidy(lmfit))
 
-
 L0_Rsquare_L0 <- 1 - mse(Y_label, y_hat) / var(Y_label)
-# ####评价指标####
 # evaluate_L0 <- data.frame(L0_Rsquare = 1-mse(Y_label,y_hat)/var(Y_label), L0_RMSE = RMSE(Y_label,y_hat))
-#
-# ####只保存P小于0.05的结果####
 # res_data_f <- as.data.frame(res_data)
 # res_data_f <- res_data_f[which(res_data_f$`Pr(>|t|)` <= 0.05),]
 # write.csv(res_data_f ,file='/data/mengxu/data/L0/feature_selected_byL0.csv')
-
 
 fit_temp <- summary(lmfit)
 ########
