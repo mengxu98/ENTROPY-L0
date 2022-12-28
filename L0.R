@@ -5,7 +5,6 @@ library("tidyr")
 library("Seurat")
 source("as_matrix_cpp.R")
 
-#
 load("/data/mengxu/data/L0/lung_L0_data_harmony.Rdata")
 seu_list <- SplitObject(scRNA_harmony, split.by = "stage")
 
@@ -49,7 +48,6 @@ genes_stage4 <- rownames(mat_stage4)
 samples_stage4 <- colnames(mat_stage4) %>% as.data.frame()
 samples_stage4$label <- "4"
 
-
 # Combine -----------------------------------------------------------------
 samples_combine <- rbind(
   samples_normal,
@@ -66,7 +64,6 @@ mat_combine <- rbind(
   t(mat_stage3),
   t(mat_stage4)
 )
-
 
 # -------------------------------------------------------------------------
 X_SNV <- mat_combine
